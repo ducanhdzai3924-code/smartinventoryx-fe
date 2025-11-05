@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SmartInventoryX — Pro UI</title>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- lucide icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app" class="app">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="logo">📦</div>
+        <div>
+          <div class="brand-title">SmartInventoryX</div>
+          <div class="brand-sub">Warehouse Manager</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-item active" data-view="dashboard"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></button>
+        <button class="nav-item" data-view="inbound"><i data-lucide="download"></i><span>Nhập kho</span></button>
+        <button class="nav-item" data-view="outbound"><i data-lucide="upload"></i><span>Xuất kho</span></button>
+        <button class="nav-item" data-view="stock"><i data-lucide="box"></i><span>Tồn kho</span></button>
+        <button class="nav-item" data-view="reports"><i data-lucide="bar-chart-3"></i><span>Báo cáo</span></button>
+        <button class="nav-item" data-view="settings"><i data-lucide="settings"></i><span>Cài đặt</span></button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="theme-switch">
+          <label>Giao diện</label>
+          <div class="theme-buttons">
+            <button id="theme-blue" class="theme-btn">Blue</button>
+            <button id="theme-dark" class="theme-btn">Dark</button>
+          </div>
+        </div>
+        <div class="version">v1.2 · DO AN 2</div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main">
+      <header class="topbar">
+        <div class="top-left">
+          <button id="btn-toggle" class="icon-btn">☰</button>
+          <h1 class="top-title">SmartInventoryX</h1>
+        </div>
+
+        <div class="top-right">
+          <input id="search" placeholder="Tìm UID / mã / tên..." class="search" />
+          <span id="whoami" style="margin-left:12px;opacity:.75"></span>
+          <button id="refresh" class="btn small">⟳</button>
+        </div>
+      </header>
+
+      <main class="content">
+        <!-- Dashboard -->
+        <section id="view-dashboard" class="view">
+          <div class="cards">
+            <div class="card stat">
+              <div class="stat-title">Lô hàng</div>
+              <div id="stat-lots" class="stat-value">—</div>
+            </div>
+            <div class="card stat">
+              <div class="stat-title">Tổng số sp</div>
+              <div id="stat-qty" class="stat-value">—</div>
+            </div>
+            <div class="card stat">
+              <div class="stat-title">Cảnh báo > 10 ngày</div>
+              <div id="stat-alerts" class="stat-value">—</div>
+            </div>
+            <div class="card stat">
+              <div class="stat-title">Kết nối BE</div>
+              <div id="stat-be" class="stat-value">—</div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Thống kê tồn kho</h3>
+              <div class="panel-actions">
+                <button id="btn-refresh-chart" class="btn">Làm mới</button>
+              </div>
+            </div>
+            <canvas id="chart-inventory" height="120"></canvas>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Hàng tồn gần đây</h3>
+              <div class="panel-actions">
+                <button id="open-inbound" class="btn primary">Nhập hàng</button>
+                <button id="open-outbound" class="btn danger">Xuất hàng</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table id="tbl-recent" class="table">
+                <thead><tr><th>UID</th><th>Mã Lô</th><th>Tên</th><th>Còn lại</th><th>Ngày nhập</th><th>Ngày tồn</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Nhập kho -->
+        <section id="view-inbound" class="view hidden">
+          <div class="panel">
+            <div class="panel-head"><h3>Nhập kho</h3></div>
+            <div class="form-grid">
+              <input id="in-uid" placeholder="UID thẻ (ví dụ: 04A1B2C3)" />
+              <input id="in-lo" placeholder="Mã Lô" />
+              <input id="in-name" placeholder="Tên mặt hàng" />
+              <input id="in-qty" type="number" placeholder="Số lượng" />
+              <input id="in-user" placeholder="Người thao tác" />
+              <div class="form-actions">
+                <button id="btn-in" class="btn primary">Ghi nhập kho</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Xuất kho -->
+        <section id="view-outbound" class="view hidden">
+          <div class="panel">
+            <div class="panel-head"><h3>Xuất kho</h3></div>
+            <div class="form-grid">
+              <input id="out-uid" placeholder="Quét UID thẻ" />
+              <input id="out-qty" type="number" placeholder="Số lượng xuất" />
+              <input id="out-user" placeholder="Người thực hiện" />
+              <div class="form-actions">
+                <button id="btn-out" class="btn danger">Ghi xuất kho</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tồn kho -->
+        <section id="view-stock" class="view hidden">
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Danh sách tồn kho</h3>
+              <div class="panel-actions">
+                <select id="filter-status">
+                  <option value="">Tất cả</option>
+                  <option value="tồn kho">tồn kho</option>
+                  <option value="đã xuất hết">đã xuất hết</option>
+                </select>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table id="tbl-stock" class="table">
+                <thead><tr><th>UID</th><th>Mã Lô</th><th>Tên</th><th>Còn lại</th><th>Ngày nhập</th><th>Trạng thái</th><th>Ngày tồn</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Báo cáo -->
+        <section id="view-reports" class="view hidden">
+          <div class="panel">
+            <h3>Báo cáo & Xuất dữ liệu</h3>
+            <div class="report-actions">
+              <button id="export-csv" class="btn">Xuất CSV</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Settings -->
+        <section id="view-settings" class="view hidden">
+          <div class="panel">
+            <h3>Cài đặt</h3>
+            <div class="settings-grid">
+              <label>Theme mặc định:
+                <select id="default-theme"><option value="blue">Blue</option><option value="dark">Dark</option></select>
+              </label>
+              <label>Threshold cảnh báo (ngày):
+                <input id="threshold-day" type="number" value="10" />
+              </label>
+            </div>
+            <div style="margin-top:12px;"><button id="save-settings" class="btn primary">Lưu cài đặt</button></div>
+          </div>
+        </section>
+
+        <!-- (Tắt mặc định) Dữ liệu phần cứng -->
+        <section class="view hidden" id="view-hw">
+          <div class="panel">
+            <div class="panel-head"><h3>Dữ liệu phần cứng</h3></div>
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>UID</th><th>Giá trị</th><th>Thời gian</th></tr></thead>
+                <tbody id="hardware-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      <footer class="footer">© 2025 · SmartInventoryX · DO AN 2</footer>
+    </div>
+  </div>
+
+  <!-- Toast / Loading -->
+  <div id="toast" class="toast hidden"></div>
+  <div id="loading" class="loading hidden">Đang tải…</div>
+
+  <script src="script.js?v=loginfix" defer></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>
