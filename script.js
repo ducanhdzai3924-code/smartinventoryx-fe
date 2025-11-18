@@ -2,24 +2,23 @@
 
 /* ================== Config ================== */
 // Firebase cấu hình
+// ================= FIREBASE INIT =================
 const firebaseConfig = {
   apiKey: "AIzaSyCHd8ZWbnOUIMYiQ1sgOUdR2lBjkPt7PxQ",
   databaseURL: "https://quanlykho-6ae1d-default-rtdb.asia-southeast1.firebasedatabase.app"
 };
 
-// Khởi tạo Firebase (chỉ 1 lần duy nhất)
+// Chỉ khởi tạo 1 lần duy nhất
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 
-// Lấy instance database
+// Lấy reference đến Realtime Database
 const db = firebase.database();
 
-// Lắng nghe dữ liệu từ node "XUAT_KHO"
-db.ref("XUAT_KHO").on("value", (snapshot) => {
-  const data = snapshot.val();
-  if (!data) return;
-  console.log("🔥 Dữ liệu realtime từ XUAT_KHO:", data);
+// Test realtime đọc dữ liệu
+db.ref("XUAT_KHO").on("value", (snap) => {
+  console.log("Realtime data:", snap.val());
 });
 
 /* ================== Config chung ================== */
