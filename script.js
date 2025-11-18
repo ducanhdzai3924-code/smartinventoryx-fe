@@ -1,17 +1,24 @@
 /* SmartInventoryX — Frontend (Nav mượt + Animation + Kết nối BE) */
 
 /* ================== Config ================== */
-const API_BASE = 'https://smartinventoryx-cloud.onrender.com/api';
-const STORAGE_THEME_KEY = 'smartinvx_theme';
-const STORAGE_SETTINGS_KEY = 'smartinvx_settings';
-/* ================== Firebase Config (Realtime Data) ================== */
+// Cấu hình Firebase (lấy từ BE)
 const firebaseConfig = {
-  apiKey: "AIzaSy...<API_KEY của bạn>...",
-  authDomain: "smartinventoryx.firebaseapp.com",
-  databaseURL: "https://smartinventoryx-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "smartinventoryx",
-  storageBucket: "smartinventoryx.appspot.com",
+  apiKey: "AIzaSyCHd8ZWbnOUIMYiQ1sgOUdR2lBjkPt7PxQ",
+  databaseURL: "https://quanlykho-6ae1d-default-rtdb.asia-southeast1.firebasedatabase.app"
 };
+
+// Khởi tạo app
+firebase.initializeApp(firebaseConfig);
+
+// Lấy instance database
+const db = firebase.database();
+
+// Lắng nghe dữ liệu từ node "XUAT_KHO"
+db.ref("XUAT_KHO").on("value", (snapshot) => {
+  const data = snapshot.val();
+  console.log("Realtime update:", data);
+});
+
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
