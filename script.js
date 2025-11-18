@@ -219,6 +219,49 @@ $('#save-settings')?.addEventListener('click', ()=>{
   localStorage.setItem(STORAGE_SETTINGS_KEY, JSON.stringify({ defaultTheme, threshold }));
   applyTheme(defaultTheme); toast('Đã lưu cài đặt');
 });
+// ================== LẤY DỮ LIỆU REALTIME TỪ BE ==================
+async function fetchRealtime() {
+  try {
+    const res = await fetch(`${API_BASE}/realtime`);
+    const js = await res.json();
+    if (js.ok) {
+      console.log("🔥 Dữ liệu realtime:", js);
+
+      // Gộp dữ liệu NHAP_KHO và XUAT_KHO lại
+      inventory = [];
+
+      js.NHAP_KHO.forEach(item => {
+        inventory.push({
+          uid: item.MaLo || "N/A",
+          ma_lo: item.MaLo || "N/A",
+          ten: item.TenHang || "Không rõ",
+          so_luong_con_lai: item.SoLuong || 0,
+          ngay_nhap: item.Time || new Date().toISOString(),
+          trang_thai: "tồn kho"
+        });
+      });
+
+      js.XUAT_KHO.forEach(item => {
+        inventory.push({
+          uid: item.MaLo || "N/A",
+          ma_lo: item.MaLo || "N/A",
+          ten: item.TenHang || "Không rõ",
+          so_luong_con_lai: item.SoLuong || 0,
+          ngay_nhap: item.Time || new Date().toISOString(),
+          trang_thai: "đã xuất"
+        });
+      });
+
+      renderStats();
+      renderRecent();
+      renderStock();
+      updateChart();
+      toast("Đã cập nhật dữ liệu Firebase!");
+    }
+  } catch (e) {
+    console.error("❌ Lỗi lấy dữ liệu realtime:", e);
+  }
+}
 
 /* ================== Login popup ================== */
 function showLogin(){
