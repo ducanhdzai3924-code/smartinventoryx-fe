@@ -49,7 +49,7 @@ db.ref("XUAT_KHO").on("value", (snap) => {
 function updateInventory() {
   inventory = [
     ...allData.NHAP_KHO.map(item => ({
-      uid: item.UID || "N/A",
+      uid: item.UID || item.MaLo || "N/A",
       ma_lo: item.MaLo || "N/A",
       ten: item.TenHang || "Không rõ",
       so_luong_con_lai: item.SoLuong || 0,
@@ -57,7 +57,7 @@ function updateInventory() {
       trang_thai: "tồn kho"
     })),
     ...allData.XUAT_KHO.map(item => ({
-      uid: item.UID || "N/A",
+      uid: item.UID || item.MaLo || "N/A",
       ma_lo: item.MaLo || "N/A",
       ten: item.TenHang || "Không rõ",
       so_luong_con_lai: item.SoLuong || 0,
