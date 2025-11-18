@@ -47,30 +47,61 @@ db.ref("XUAT_KHO").on("value", (snap) => {
 
 // Cập nhật giao diện
 function updateInventory() {
-  inventory = [
-    ...allData.NHAP_KHO.map(item => ({
-      uid: item.UID || item.MaLo || "N/A",
-      ma_lo: item.MaLo || "N/A",
-      ten: item.TenHang || "Không rõ",
-      so_luong_con_lai: item.SoLuong || 0,
-      ngay_nhap: item.Time || new Date().toISOString(),
-      trang_thai: "tồn kho"
-    })),
-    ...allData.XUAT_KHO.map(item => ({
-      uid: item.UID || item.MaLo || "N/A",
-      ma_lo: item.MaLo || "N/A",
-      ten: item.TenHang || "Không rõ",
-      so_luong_con_lai: item.SoLuong || 0,
-      ngay_nhap: item.Time || new Date().toISOString(),
-      trang_thai: "đã xuất"
-    }))
-  ];
+  // Gộp dữ liệu gốc
+  const nhap = allData.NHAP_KHO || [];
+  const xuat = allData.XUAT_KHO || [];
+
+  // Gom nhóm theo MaLo để tính tồn thực tế
+  const stockMap = {};
+
+  // Cộng số lượng nhập
+  nhap.forEach(item => {
+    const key = item.MaLo || "N/A";
+    if (!stockMap[key]) {
+      stockMap[key] = {
+        uid: item.UID || item.MaLo || "N/A",
+        ma_lo: key,
+        ten: item.TenHang || "Không rõ",
+        nhap: 0,
+        xuat: 0,
+        ngay_nhap: item.Time || new Date().toISOString()
+      };
+    }
+    stockMap[key].nhap += Number(item.SoLuong || 0);
+  });
+
+  // Cộng số lượng xuất
+  xuat.forEach(item => {
+    const key = item.MaLo || "N/A";
+    if (!stockMap[key]) {
+      stockMap[key] = {
+        uid: item.UID || item.MaLo || "N/A",
+        ma_lo: key,
+        ten: item.TenHang || "Không rõ",
+        nhap: 0,
+        xuat: 0,
+        ngay_nhap: item.Time || new Date().toISOString()
+      };
+    }
+    stockMap[key].xuat += Number(item.SoLuong || 0);
+  });
+
+  // Tạo danh sách cuối cùng (tồn = nhập - xuất)
+  inventory = Object.values(stockMap).map(item => {
+    const conLai = item.nhap - item.xuat;
+    return {
+      ...item,
+      so_luong_con_lai: conLai,
+      trang_thai: conLai > 0 ? "tồn kho" : "đã xuất hết"
+    };
+  });
 
   renderStats();
   renderRecent();
   renderStock();
   console.log("🔥 Cập nhật từ Firebase:", inventory);
 }
+
 
 
     console.log("🔥 Firebase đã khởi tạo thành công!");
