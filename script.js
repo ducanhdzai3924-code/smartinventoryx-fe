@@ -21,15 +21,57 @@ let inventory = [];
     db = firebase.database();
 
     // Lắng nghe dữ liệu Realtime
-    db.ref("NHAP_KHO").on("value", (snap) => {
-      allData.NHAP_KHO = Object.values(snap.val() || {});
-      updateInventory();
-    });
+    // ================= FIREBASE REALTIME UPDATE (chuẩn hóa) =================
 
-    db.ref("XUAT_KHO").on("value", (snap) => {
-      allData.XUAT_KHO = Object.values(snap.val() || {});
-      updateInventory();
-    });
+// Đọc dữ liệu nhập kho
+db.ref("NHAP_KHO").on("value", (snap) => {
+  const val = snap.val() || {};
+  allData.NHAP_KHO = Object.values(val);
+  updateInventory();
+});
+
+// Đọc dữ liệu xuất kho (nested logs)
+db.ref("XUAT_KHO").on("value", (snap) => {
+  const val = snap.val() || {};
+  let xuatArr = [];
+
+  Object.values(val).forEach(item => {
+    if (item.Logs) {
+      Object.values(item.Logs).forEach(log => xuatArr.push(log));
+    }
+  });
+
+  allData.XUAT_KHO = xuatArr;
+  updateInventory();
+});
+
+// Cập nhật giao diện
+function updateInventory() {
+  inventory = [
+    ...allData.NHAP_KHO.map(item => ({
+      uid: item.UID || "N/A",
+      ma_lo: item.MaLo || "N/A",
+      ten: item.TenHang || "Không rõ",
+      so_luong_con_lai: item.SoLuong || 0,
+      ngay_nhap: item.Time || new Date().toISOString(),
+      trang_thai: "tồn kho"
+    })),
+    ...allData.XUAT_KHO.map(item => ({
+      uid: item.UID || "N/A",
+      ma_lo: item.MaLo || "N/A",
+      ten: item.TenHang || "Không rõ",
+      so_luong_con_lai: item.SoLuong || 0,
+      ngay_nhap: item.Time || new Date().toISOString(),
+      trang_thai: "đã xuất"
+    }))
+  ];
+
+  renderStats();
+  renderRecent();
+  renderStock();
+  console.log("🔥 Cập nhật từ Firebase:", inventory);
+}
+
 
     console.log("🔥 Firebase đã khởi tạo thành công!");
   } catch (err) {
