@@ -22,13 +22,85 @@
 
     // Kết nối Realtime DB
     const db = firebase.database();
-    db.ref("XUAT_KHO").on("value", (snap) => {
-      console.log("🔥 Dữ liệu realtime từ Firebase:", snap.val());
-    });
+   // ================= FIREBASE REALTIME UPDATE =================
+const allData = { NHAP_KHO: [], XUAT_KHO: [] };
+
+db.ref("NHAP_KHO").on("value", snap => {
+  allData.NHAP_KHO = Object.values(snap.val() || {});
+  updateInventory();
+});
+
+db.ref("XUAT_KHO").on("value", snap => {
+  allData.XUAT_KHO = Object.values(snap.val() || {});
+  updateInventory();
+});
+
+function updateInventory() {
+  inventory = [
+    ...allData.NHAP_KHO.map(item => ({
+      uid: item.MaLo || "N/A",
+      ma_lo: item.MaLo || "N/A",
+      ten: item.TenHang || "Không rõ",
+      so_luong_con_lai: item.SoLuong || 0,
+      ngay_nhap: item.Time || new Date().toISOString(),
+      trang_thai: "tồn kho"
+    })),
+    ...allData.XUAT_KHO.map(item => ({
+      uid: item.MaLo || "N/A",
+      ma_lo: item.MaLo || "N/A",
+      ten: item.TenHang || "Không rõ",
+      so_luong_con_lai: item.SoLuong || 0,
+      ngay_nhap: item.Time || new Date().toISOString(),
+      trang_thai: "đã xuất"
+    }))
+  ];
+
+  renderStats();
+  renderRecent();
+  renderStock();
+}
+
   } catch (err) {
     console.error("❌ Firebase init error:", err);
   }
 })();
+// ================= FIREBASE REALTIME UPDATE =================
+const allData = { NHAP_KHO: [], XUAT_KHO: [] };
+
+db.ref("NHAP_KHO").on("value", snap => {
+  allData.NHAP_KHO = Object.values(snap.val() || {});
+  updateInventory();
+});
+
+db.ref("XUAT_KHO").on("value", snap => {
+  allData.XUAT_KHO = Object.values(snap.val() || {});
+  updateInventory();
+});
+
+function updateInventory() {
+  inventory = [
+    ...allData.NHAP_KHO.map(item => ({
+      uid: item.MaLo || "N/A",
+      ma_lo: item.MaLo || "N/A",
+      ten: item.TenHang || "Không rõ",
+      so_luong_con_lai: item.SoLuong || 0,
+      ngay_nhap: item.Time || new Date().toISOString(),
+      trang_thai: "tồn kho"
+    })),
+    ...allData.XUAT_KHO.map(item => ({
+      uid: item.MaLo || "N/A",
+      ma_lo: item.MaLo || "N/A",
+      ten: item.TenHang || "Không rõ",
+      so_luong_con_lai: item.SoLuong || 0,
+      ngay_nhap: item.Time || new Date().toISOString(),
+      trang_thai: "đã xuất"
+    }))
+  ];
+
+  renderStats();
+  renderRecent();
+  renderStock();
+}
 
 /* ================= Config chung ================= */
 const API_BASE = "https://smartinventoryx-cloud.onrender.com/api";
