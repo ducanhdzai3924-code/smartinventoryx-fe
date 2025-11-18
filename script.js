@@ -4,6 +4,38 @@
 const API_BASE = 'https://smartinventoryx-cloud.onrender.com/api';
 const STORAGE_THEME_KEY = 'smartinvx_theme';
 const STORAGE_SETTINGS_KEY = 'smartinvx_settings';
+/* ================== Firebase Config (Realtime Data) ================== */
+const firebaseConfig = {
+  apiKey: "AIzaSy...<API_KEY của bạn>...",
+  authDomain: "smartinventoryx.firebaseapp.com",
+  databaseURL: "https://smartinventoryx-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "smartinventoryx",
+  storageBucket: "smartinventoryx.appspot.com",
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// Lắng nghe dữ liệu Realtime
+db.ref("logs").on("value", (snapshot) => {
+  const data = snapshot.val() || {};
+  const logs = Object.values(data);
+  const tbody = document.querySelector("#tbl-stock tbody");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+  logs.reverse().forEach((item) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${item.uid}</td>
+      <td>${item.action}</td>
+      <td>${new Date(item.time).toLocaleString()}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  console.log("Realtime update:", logs.length, "records");
+});
 
 /* ================== DOM helpers ================== */
 const $  = (s, p=document) => p.querySelector(s);
