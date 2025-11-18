@@ -215,11 +215,15 @@
   <script src="script.js?v=loginfix" defer></script>
   <script>lucide.createIcons();</script>
   <!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <!-- Firebase SDK (phải đặt TRƯỚC script chính) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-
-<!-- Script chính của bạn -->
-<script src="./script.js"></script>
+  <!-- Script chính -->
+  <script src="script.js?v=finalfix" defer></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>
 
 </body>
 </html>
