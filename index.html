@@ -61,7 +61,147 @@
       </header>
 
       <main class="content">
-        <!-- ... (phần nội dung giữ nguyên) ... -->
+        <!-- Dashboard -->
+        <section id="view-dashboard" class="view">
+          <div class="cards">
+            <div class="card stat">
+              <div class="stat-title">Lô hàng</div>
+              <div id="stat-lots" class="stat-value">—</div>
+            </div>
+            <div class="card stat">
+              <div class="stat-title">Tổng số sp</div>
+              <div id="stat-qty" class="stat-value">—</div>
+            </div>
+            <div class="card stat">
+              <div class="stat-title">Cảnh báo > 10 ngày</div>
+              <div id="stat-alerts" class="stat-value">—</div>
+            </div>
+            <div class="card stat">
+              <div class="stat-title">Kết nối BE</div>
+              <div id="stat-be" class="stat-value">—</div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Thống kê tồn kho</h3>
+              <div class="panel-actions">
+                <button id="btn-refresh-chart" class="btn">Làm mới</button>
+              </div>
+            </div>
+            <canvas id="chart-inventory" height="120"></canvas>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Hàng tồn gần đây</h3>
+              <div class="panel-actions">
+                <button id="open-inbound" class="btn primary">Nhập hàng</button>
+                <button id="open-outbound" class="btn danger">Xuất hàng</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table id="tbl-recent" class="table">
+                <thead><tr><th>UID</th><th>Mã Lô</th><th>Tên</th><th>Còn lại</th><th>Ngày nhập</th><th>Ngày tồn</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Nhập kho -->
+        <section id="view-inbound" class="view hidden">
+          <div class="panel">
+            <div class="panel-head"><h3>Nhập kho</h3></div>
+            <div class="form-grid">
+              <input id="in-uid" placeholder="UID thẻ (ví dụ: 04A1B2C3)" />
+              <input id="in-lo" placeholder="Mã Lô" />
+              <input id="in-name" placeholder="Tên mặt hàng" />
+              <input id="in-qty" type="number" placeholder="Số lượng" />
+              <input id="in-user" placeholder="Người thao tác" />
+              <div class="form-actions">
+                <button id="btn-in" class="btn primary">Ghi nhập kho</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Xuất kho -->
+        <section id="view-outbound" class="view hidden">
+          <div class="panel">
+            <div class="panel-head"><h3>Xuất kho</h3></div>
+            <div class="form-grid">
+              <input id="out-uid" placeholder="Quét UID thẻ" />
+              <input id="out-qty" type="number" placeholder="Số lượng xuất" />
+              <input id="out-user" placeholder="Người thực hiện" />
+              <div class="form-actions">
+                <button id="btn-out" class="btn danger">Ghi xuất kho</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tồn kho -->
+        <section id="view-stock" class="view hidden">
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Danh sách tồn kho</h3>
+              <div class="panel-actions">
+                <select id="filter-status">
+                  <option value="">Tất cả</option>
+                  <option value="tồn kho">tồn kho</option>
+                  <option value="đã xuất hết">đã xuất hết</option>
+                </select>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table id="tbl-stock" class="table">
+                <thead><tr><th>UID</th><th>Mã Lô</th><th>Tên</th><th>Còn lại</th><th>Ngày nhập</th><th>Trạng thái</th><th>Ngày tồn</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Báo cáo -->
+        <section id="view-reports" class="view hidden">
+          <div class="panel">
+            <h3>Báo cáo & Xuất dữ liệu</h3>
+            <div class="report-actions">
+              <button id="export-csv" class="btn">Xuất CSV</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Settings -->
+        <section id="view-settings" class="view hidden">
+          <div class="panel">
+            <h3>Cài đặt</h3>
+            <div class="settings-grid">
+              <label>Theme mặc định:
+                <select id="default-theme"><option value="blue">Blue</option><option value="dark">Dark</option></select>
+              </label>
+              <label>Threshold cảnh báo (ngày):
+                <input id="threshold-day" type="number" value="10" />
+              </label>
+            </div>
+            <div style="margin-top:12px;"><button id="save-settings" class="btn primary">Lưu cài đặt</button></div>
+          </div>
+        </section>
+
+        <!-- (Tắt mặc định) Dữ liệu phần cứng -->
+        <section class="view hidden" id="view-hw">
+          <div class="panel">
+            <div class="panel-head"><h3>Dữ liệu phần cứng</h3></div>
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>UID</th><th>Giá trị</th><th>Thời gian</th></tr></thead>
+                <tbody id="hardware-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
       </main>
 
       <footer class="footer">© 2025 · SmartInventoryX · DO AN 2</footer>
@@ -72,12 +212,14 @@
   <div id="toast" class="toast hidden"></div>
   <div id="loading" class="loading hidden">Đang tải…</div>
 
-  <!-- Firebase SDK (phải đặt TRƯỚC script chính) -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-  <!-- Script chính -->
-  <script src="script.js?v=final" defer></script>
+  <script src="script.js?v=loginfix" defer></script>
   <script>lucide.createIcons();</script>
+  <!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+
+
+<!-- Script chính của bạn -->
+<script src="./script.js"></script>
+
 </body>
 </html>
