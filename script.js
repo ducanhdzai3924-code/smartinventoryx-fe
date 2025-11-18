@@ -1,82 +1,43 @@
 /* SmartInventoryX — Frontend (Firebase Realtime + BE Connection Stable) */
 
 /* ================= FIREBASE INIT ================= */
+let db;
+let allData = { NHAP_KHO: [], XUAT_KHO: [] };
+let inventory = [];
+
 (function initFirebase() {
   try {
-    // Cấu hình Firebase Web
     const firebaseConfig = {
       apiKey: "AIzaSyCHd8ZWbnOUIMYiQ1sgOUdR2lBjkPt7PxQ",
       databaseURL: "https://quanlykho-6ae1d-default-rtdb.asia-southeast1.firebasedatabase.app",
     };
 
-    // Kiểm tra firebase đã được load chưa
     if (typeof firebase === "undefined") {
       console.error("⚠️ Firebase SDK chưa được load! Kiểm tra lại index.html");
       return;
     }
 
-    // Chỉ khởi tạo 1 lần
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
 
-    // Kết nối Realtime DB
-    const db = firebase.database();
-   // ================= FIREBASE REALTIME UPDATE =================
-const allData = { NHAP_KHO: [], XUAT_KHO: [] };
+    // Lắng nghe dữ liệu Realtime
+    db.ref("NHAP_KHO").on("value", (snap) => {
+      allData.NHAP_KHO = Object.values(snap.val() || {});
+      updateInventory();
+    });
 
-db.ref("NHAP_KHO").on("value", snap => {
-  allData.NHAP_KHO = Object.values(snap.val() || {});
-  updateInventory();
-});
+    db.ref("XUAT_KHO").on("value", (snap) => {
+      allData.XUAT_KHO = Object.values(snap.val() || {});
+      updateInventory();
+    });
 
-db.ref("XUAT_KHO").on("value", snap => {
-  allData.XUAT_KHO = Object.values(snap.val() || {});
-  updateInventory();
-});
-
-function updateInventory() {
-  inventory = [
-    ...allData.NHAP_KHO.map(item => ({
-      uid: item.MaLo || "N/A",
-      ma_lo: item.MaLo || "N/A",
-      ten: item.TenHang || "Không rõ",
-      so_luong_con_lai: item.SoLuong || 0,
-      ngay_nhap: item.Time || new Date().toISOString(),
-      trang_thai: "tồn kho"
-    })),
-    ...allData.XUAT_KHO.map(item => ({
-      uid: item.MaLo || "N/A",
-      ma_lo: item.MaLo || "N/A",
-      ten: item.TenHang || "Không rõ",
-      so_luong_con_lai: item.SoLuong || 0,
-      ngay_nhap: item.Time || new Date().toISOString(),
-      trang_thai: "đã xuất"
-    }))
-  ];
-
-  renderStats();
-  renderRecent();
-  renderStock();
-}
-
+    console.log("🔥 Firebase đã khởi tạo thành công!");
   } catch (err) {
     console.error("❌ Firebase init error:", err);
   }
 })();
-// ================= FIREBASE REALTIME UPDATE =================
-const allData = { NHAP_KHO: [], XUAT_KHO: [] };
 
-db.ref("NHAP_KHO").on("value", snap => {
-  allData.NHAP_KHO = Object.values(snap.val() || {});
-  updateInventory();
-});
-
-db.ref("XUAT_KHO").on("value", snap => {
-  allData.XUAT_KHO = Object.values(snap.val() || {});
-  updateInventory();
-});
-
+/* ================= Realtime update inventory ================= */
 function updateInventory() {
   inventory = [
     ...allData.NHAP_KHO.map(item => ({
@@ -100,6 +61,7 @@ function updateInventory() {
   renderStats();
   renderRecent();
   renderStock();
+  console.log("🔥 Realtime cập nhật từ Firebase:", inventory.length, "mặt hàng");
 }
 
 /* ================= Config chung ================= */
@@ -184,58 +146,6 @@ async function checkBackend() {
   $("#stat-be").textContent = "Không có BE";
   $("#stat-be").style.color = "var(--danger)";
   return false;
-}
-
-/* ================= Mock data ================= */
-let inventory = [
-  { uid: "04A1B2C3", ma_lo: "LO001", ten: "Chuột Logitech", so_luong_con_lai: 120, ngay_nhap: "2025-10-10T08:00:00Z", trang_thai: "tồn kho" },
-  { uid: "04A1B2C4", ma_lo: "LO002", ten: "Bàn phím Razer", so_luong_con_lai: 55, ngay_nhap: "2025-10-05T09:30:00Z", trang_thai: "tồn kho" },
-];
-let historyLogs = [];
-// ================= FIREBASE REALTIME =================
-const firebaseConfig = {
-  apiKey: "AIzaSyCHd8ZWbnOUIMYiQ1sgOUdR2lBjkPt7PxQ",
-  databaseURL: "https://quanlykho-6ae1d-default-rtdb.asia-southeast1.firebasedatabase.app"
-};
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-const allData = { NHAP_KHO: [], XUAT_KHO: [] };
-
-db.ref("NHAP_KHO").on("value", (snap) => {
-  allData.NHAP_KHO = Object.values(snap.val() || {});
-  updateInventory();
-});
-
-db.ref("XUAT_KHO").on("value", (snap) => {
-  allData.XUAT_KHO = Object.values(snap.val() || {});
-  updateInventory();
-});
-
-function updateInventory() {
-  inventory = [
-    ...allData.NHAP_KHO.map(item => ({
-      uid: item.MaLo || "N/A",
-      ma_lo: item.MaLo || "N/A",
-      ten: item.TenHang || "Không rõ",
-      so_luong_con_lai: item.SoLuong || 0,
-      ngay_nhap: item.Time || new Date().toISOString(),
-      trang_thai: "tồn kho"
-    })),
-    ...allData.XUAT_KHO.map(item => ({
-      uid: item.MaLo || "N/A",
-      ma_lo: item.MaLo || "N/A",
-      ten: item.TenHang || "Không rõ",
-      so_luong_con_lai: item.SoLuong || 0,
-      ngay_nhap: item.Time || new Date().toISOString(),
-      trang_thai: "đã xuất"
-    }))
-  ];
-
-  renderStats();
-  renderRecent();
-  renderStock();
-  console.log("🔥 Realtime cập nhật từ Firebase:", inventory.length, "mặt hàng");
 }
 
 /* ================= Render helpers ================= */
